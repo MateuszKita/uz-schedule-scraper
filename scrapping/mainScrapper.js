@@ -17,17 +17,24 @@ request(mainWebsiteUrl, (er, res) => {
                 groups: []
             })
         })
-        console.log(studyCourses[0])
+        // console.log(studyCourses[0])
 
         studyCourses.forEach(studyCourse => {
-            request(studyCourses[0], (er, res) => {
+            request(studyCourse.url, (er, res) => {
                 const $ = cheerio.load(res.body)
                 $('tbody tr td a').each((index, el) => {
-                    studyCourse.
+                    studyCourse.groups.push(
+                        {
+                            id: index,
+                            name: el.children[0].data,
+                            url: uzUrlPrefix + el.attribs.href
+                        }
+                    )
                 })
-                console.log(tu)
+                console.log(studyCourse)
             })
         })
+
     }
     else {
         console.log(res.statusCode, er)
