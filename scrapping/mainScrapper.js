@@ -1,7 +1,7 @@
 const request = require('request')
 const cheerio = require('cheerio')
+const async = require('async')
 
-const mainWebsiteUrl = 'http://www.plan.uz.zgora.pl/grupy_lista_kierunkow.php'
 const uzUrlPrefix = 'http://www.plan.uz.zgora.pl/'
 
 request(mainWebsiteUrl, (er, res) => {
@@ -17,7 +17,6 @@ request(mainWebsiteUrl, (er, res) => {
                 groups: []
             })
         })
-        // console.log(studyCourses[0])
 
         studyCourses.forEach(studyCourse => {
             request(studyCourse.url, (er, res) => {
@@ -40,3 +39,14 @@ request(mainWebsiteUrl, (er, res) => {
         console.log(res.statusCode, er)
     }
 })
+
+
+const mainScrapper = (mainUrl) => {
+    async.waterfall(cb => {
+
+    })
+}
+
+module.exports = {
+    mainScrapper: mainScrapper
+}
