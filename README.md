@@ -1,0 +1,1 @@
+This project contains scraper for UZ Schedule.
