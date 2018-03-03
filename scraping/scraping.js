@@ -1,5 +1,5 @@
-const MS = require('./mainScrapper')
+const MS = require('./mainScraper')
 
 const mainWebsiteUrl = 'http://www.plan.uz.zgora.pl/grupy_lista_kierunkow.php'
 
-MS.mainScrapper(mainWebsiteUrl)
+MS.mainScraper(mainWebsiteUrl)
