@@ -25,52 +25,45 @@ const mainScraper = (mainUrl) => {
                 else {
                     console.log('[1st request ERROR:]', res.statusCode, er)
                 }
+
                 console.log('[1st request] OK')
                 cb(null, studyCourses)
             })
         },
         (studyCourses, cb) => {
             console.log('[2nd request] Calling studyCourses URLs')
-            new Promise((resolve, reject) => {
-                let studyCoursesWithGroups = []
+            let studyCoursesWithGroups = []
 
-                addGroups = async (allCourses) => {
+            studyCourses.map(studyCourse => {
+                request(studyCourse.url, (er, res) => {
+                    if (er) {
+                        console.log(studyCourse.id + " studyCourses ERROR:", er)
+                    }
+                    else {
+                        const $ = cheerio.load(res.body)
+                        $('tbody tr td a').each((index, el) => {
+                            studyCourse.groups.push(
+                                {
+                                    id: index,
+                                    name: el.children[0].data,
+                                    url: uzUrlPrefix + el.attribs.href
+                                }
+                            )
+                        })
+                    }
 
-                }
+                    studyCoursesWithGroups.push(studyCourse)
 
-                studyCourses.map(studyCourse => {
-                    request(studyCourse.url, (er, res) => {
-                        if (er) {
-                            reject(er)
-                        }
-                        else {
-                            const $ = cheerio.load(res.body)
-                            $('tbody tr td a').each((index, el) => {
-                                studyCourse.groups.push(
-                                    {
-                                        id: index,
-                                        name: el.children[0].data,
-                                        url: uzUrlPrefix + el.attribs.href
-                                    }
-                                )
-                            })
-                            studyCoursesWithGroups.push(studyCourse)
-                            console.log(studyCoursesWithGroups);
-                        }
-                    })
+                    if (studyCoursesWithGroups.length == studyCourses.length) {
+                        console.log('[2nd request] OK')
+                        cb(null, studyCoursesWithGroups)
+                    }
                 })
-                resolve(studyCoursesWithGroups)
             })
-                .then(studyCoursesWithGroups => {
-                    console.log('[2nd request] OK')
-                    cb(null, studyCoursesWithGroups)
-                })
-                .catch(err => {
-                    console.log('[2nd request] ERROR:', err)
-                })
         },
         (studyCoursesWithGroups, cb) => {
-            console.log(studyCoursesWithGroups)
+            console.log('[3rd request]')
+            console.log(studyCoursesWithGroups[0])
         }
     ]
     )
