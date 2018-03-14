@@ -39,6 +39,7 @@ const mainScraper = mainUrl => {
             console.log(studyCourse.id + " studyCourses ERROR:", er);
           } else {
             const $ = cheerio.load(res.body);
+
             $("tbody tr td a").each((index, el) => {
               studyCourse.groups.push({
                 id: index,
@@ -59,28 +60,52 @@ const mainScraper = mainUrl => {
     },
     (studyCoursesWithGroups, cb) => {
       console.log("[3rd request]");
-      studyCoursesWithGroups.forEach(studyCourseGroup => {
-        studyCourseGroup.groups.forEach(group => {
-          request(group.url, (er, res) => {
-            if (!er && res.statusCode == "200") {
-              const $ = cheerio.load(res.body);
+      let groupsAmount = 0;
+      studyCoursesWithGroups.forEach(studyCoursesWithGroup => {
+        groupsAmount += studyCoursesWithGroup.groups.length;
+      });
 
-              $(".list-group-item li a").each((index, el) => {
-                studyCourses.push({
-                  id: index,
-                  url: uzUrlPrefix + el.attribs.href,
-                  name: el.children[0].data,
-                  groups: []
-                });
-              });
-            } else {
-              console.log("[3rd request ERROR:]", res.statusCode, er);
+      let newGroups = [];
+      studyCoursesWithGroups.map(studyCourseWithGroups => {
+        studyCourseWithGroups.groups.map(group => {
+          request(group.url, (er, res) => {
+            if (res.statusCode) {
+              if (!er && res.statusCode == "200") {
+                // const $ = cheerio.load(res.body);
+                // $(".list-group-item li a").each((index, el) => {
+                //   studyCourses.push({
+                //     id: index,
+                //     url: uzUrlPrefix + el.attribs.href,
+                //     name: el.children[0].data,
+                //     groups: []
+                //   });
+                // });
+                newGroups.push(res);
+              } else {
+                console.log("[3rd request] ERROR: ", res.statusCode, er);
+              }
+              console.log(
+                "groupsAmount: " +
+                  groupsAmount +
+                  "\nnewGroups.length: " +
+                  newGroups.length
+              );
+              if (groupsAmount == newGroups.length) {
+                console.log("[3rd request] OK");
+                cb(null, newGroups);
+              }
             }
-            console.log("[3rd request] OK");
-            cb(null, studyCourses);
           });
         });
+        // console.log(studyCoursesWithGroupsPlans);
+        // console.log(
+        //   studyCoursesWithGroups.length + studyCoursesWithGroupsPlans.length
+        // );
       });
+    },
+    (studyCoursesWithGroupsPlans, cb) => {
+      console.log("[4rd request]");
+      // console.log(studyCoursesWithGroupsPlans[0]);
     }
   ]);
 };
