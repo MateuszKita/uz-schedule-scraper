@@ -59,13 +59,14 @@ const mainScraper = mainUrl => {
       });
     },
     (studyCoursesWithGroups, cb) => {
-      console.log("[3rd request]");
-      let groupsAmount = 0;
+      console.log("[3rd request] Calling study courses groups' URLs");
+      let studyCoursesWithGroupsAmount = 0;
+      let newStudyCoursesWithGroupsAmount = 0;
       studyCoursesWithGroups.forEach(studyCoursesWithGroup => {
-        groupsAmount += studyCoursesWithGroup.groups.length;
+        studyCoursesWithGroupsAmount += studyCoursesWithGroup.groups.length;
       });
 
-      let newGroups = [];
+      let newStudyCoursesWithGroups = [];
       studyCoursesWithGroups.map(studyCourseWithGroups => {
         studyCourseWithGroups.groups.map(group => {
           request(group.url, (er, res) => {
@@ -80,32 +81,34 @@ const mainScraper = mainUrl => {
                 //     groups: []
                 //   });
                 // });
-                newGroups.push(res);
+                newStudyCoursesWithGroups.push(studyCourseWithGroups);
               } else {
                 console.log("[3rd request] ERROR: ", res.statusCode, er);
               }
-              console.log(
-                "groupsAmount: " +
-                  groupsAmount +
-                  "\nnewGroups.length: " +
-                  newGroups.length
-              );
-              if (groupsAmount == newGroups.length) {
+              newStudyCoursesWithGroupsAmount++;
+              if (
+                studyCoursesWithGroupsAmount == newStudyCoursesWithGroupsAmount
+              ) {
                 console.log("[3rd request] OK");
-                cb(null, newGroups);
+                cb(null, newStudyCoursesWithGroups);
               }
             }
           });
         });
-        // console.log(studyCoursesWithGroupsPlans);
-        // console.log(
-        //   studyCoursesWithGroups.length + studyCoursesWithGroupsPlans.length
-        // );
       });
     },
     (studyCoursesWithGroupsPlans, cb) => {
       console.log("[4rd request]");
-      // console.log(studyCoursesWithGroupsPlans[0]);
+      studyCoursesWithGroupsPlans = studyCoursesWithGroupsPlans.sort(
+        (course, another) => {
+          if (course.id < another.id) return -1;
+          if (course.id > another.id) return 1;
+          return 0;
+        }
+      );
+      console.log(studyCoursesWithGroupsPlans[0]);
+      console.log(studyCoursesWithGroupsPlans[1]);
+      console.log(studyCoursesWithGroupsPlans[2]);
     }
   ]);
 };
