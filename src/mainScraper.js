@@ -2,6 +2,8 @@ const request = require('request');
 const cheerio = require('cheerio');
 const async = require('async');
 
+const WJF = require('./writeJsonFile');
+
 const uzUrlPrefix = 'http://www.plan.uz.zgora.pl/';
 
 const mainScraper = mainUrl => {
@@ -113,7 +115,7 @@ const mainScraper = mainUrl => {
                 console.log('[3rd request] ERROR: ' + er);
               }
             });
-          }, 3000 + time);
+          }, 3500 + time);
         });
       });
     },
@@ -126,9 +128,7 @@ const mainScraper = mainUrl => {
           return 0;
         }
       );
-      console.log(studyCoursesWithGroupsPlans[0]);
-      console.log(studyCoursesWithGroupsPlans[1]);
-      console.log(studyCoursesWithGroupsPlans[2]);
+      WJF.writeJsonFile(studyCoursesWithGroupsPlans);
     }
   ]);
 };
