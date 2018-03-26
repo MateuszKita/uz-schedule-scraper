@@ -81,7 +81,13 @@ const mainScraper = mainUrl => {
           time += 100;
           setTimeout(() => {
             request(group.url, (er, res) => {
-              group.schedule = [];
+              group.schedule = {
+                monday: {},
+                tuesday: {},
+                wednesday: {},
+                thursday: {},
+                friday: {}
+              };
               processCounter++;
               if (!er) {
                 // const $ = cheerio.load(res.body);
