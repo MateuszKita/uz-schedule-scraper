@@ -2,6 +2,8 @@ const request = require('request');
 const cheerio = require('cheerio');
 const async = require('async');
 
+const WJF = require('./writeJsonFile');
+
 const uzUrlPrefix = 'http://www.plan.uz.zgora.pl/';
 
 const mainScraper = mainUrl => {
@@ -17,7 +19,10 @@ const mainScraper = mainUrl => {
             studyCourses.push({
               id: index,
               url: uzUrlPrefix + el.attribs.href,
-              name: el.children[0].data,
+              name:
+                el.children[0].data !== undefined
+                  ? el.children[0].data
+                  : 'undefined',
               groups: []
             });
           });
@@ -81,7 +86,13 @@ const mainScraper = mainUrl => {
           time += 100;
           setTimeout(() => {
             request(group.url, (er, res) => {
-              group.schedule = [];
+              group.schedule = {
+                monday: {},
+                tuesday: {},
+                wednesday: {},
+                thursday: {},
+                friday: {}
+              };
               processCounter++;
               if (!er) {
                 // const $ = cheerio.load(res.body);
@@ -107,7 +118,7 @@ const mainScraper = mainUrl => {
                 console.log('[3rd request] ERROR: ' + er);
               }
             });
-          }, 3000 + time);
+          }, 3500 + time);
         });
       });
     },
@@ -120,9 +131,7 @@ const mainScraper = mainUrl => {
           return 0;
         }
       );
-      console.log(studyCoursesWithGroupsPlans[0]);
-      console.log(studyCoursesWithGroupsPlans[1]);
-      console.log(studyCoursesWithGroupsPlans[2]);
+      WJF.writeToFile(studyCoursesWithGroupsPlans);
     }
   ]);
 };
