@@ -19,7 +19,10 @@ const mainScraper = mainUrl => {
             studyCourses.push({
               id: index,
               url: uzUrlPrefix + el.attribs.href,
-              name: el.children[0].data,
+              name:
+                el.children[0].data !== undefined
+                  ? el.children[0].data
+                  : 'undefined',
               groups: []
             });
           });
