@@ -12,5 +12,5 @@ const writeToFile = object => {
 };
 
 module.exports = {
-  writeJsonFile: this.writeJsonFile
+  writeToFile: writeToFile
 };

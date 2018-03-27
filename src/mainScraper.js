@@ -128,7 +128,7 @@ const mainScraper = mainUrl => {
           return 0;
         }
       );
-      WJF.writeJsonFile(studyCoursesWithGroupsPlans);
+      WJF.writeToFile(studyCoursesWithGroupsPlans);
     }
   ]);
 };
