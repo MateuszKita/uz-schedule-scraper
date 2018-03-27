@@ -7,7 +7,7 @@ const writeToFile = object => {
   };
   let fileName = newObject.key.toString();
   console.log('Saving ' + fileName + ' to /files directory.');
-  let newJsonObject = JSON.stringify(newObject);
+  let newJsonObject = JSON.stringify(newObject, null, 2);
   fs.writeFileSync('../files/' + fileName + '.json', newJsonObject);
 };
 
