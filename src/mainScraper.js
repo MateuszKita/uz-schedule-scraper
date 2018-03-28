@@ -14,7 +14,10 @@ const mainScraper = mainUrl => {
       request(mainUrl, (er, res) => {
         if (!er && res.statusCode == '200') {
           const $ = cheerio.load(res.body);
-
+          $('li .list-group').each((index, el) => {
+            const faculties = el.prev.data.trim();
+            console.log("'" + faculties + "'");
+          });
           $('.list-group-item li a').each((index, el) => {
             studyCourses.push({
               id: index,
