@@ -9,60 +9,80 @@ const uzUrlPrefix = 'http://www.plan.uz.zgora.pl/';
 const mainScraper = mainUrl => {
   async.waterfall([
     cb => {
-      let studyCourses = [];
+      let faculties = [];
       console.log('[1st request] Calling MainUrl');
       request(mainUrl, (er, res) => {
         if (!er && res.statusCode == '200') {
           const $ = cheerio.load(res.body);
           $('li .list-group').each((index, el) => {
-            const faculties = el.prev.data.trim();
-            console.log("'" + faculties + "'");
+            faculties.push({
+              id: index,
+              name: el.prev.data.trim(),
+              courses: []
+            });
+            // console.log("'" + faculties + "'");
           });
           $('.list-group-item li a').each((index, el) => {
-            studyCourses.push({
-              id: index,
-              url: uzUrlPrefix + el.attribs.href,
-              name:
-                el.children[0].data !== undefined
-                  ? el.children[0].data
-                  : 'undefined',
-              groups: []
+            faculties.map(faculty => {
+              if (faculty.name === el.parent.prev.parent.prev.data.trim()) {
+                faculty.courses.push({
+                  id: index,
+                  url: uzUrlPrefix + el.attribs.href,
+                  name:
+                    el.children[0].data !== undefined
+                      ? el.children[0].data
+                      : 'undefined',
+                  groups: []
+                });
+              }
             });
+            // if (index == 0) {
+            //   console.log(el.parent.prev.parent.prev.data.trim());
+            // }
           });
         } else {
           console.log('[1st request ERROR:]', res.statusCode, er);
         }
 
         console.log('[1st request] OK');
-        cb(null, studyCourses);
+        cb(null, faculties);
       });
     },
-    (studyCourses, cb) => {
+    (faculties, cb) => {
       console.log('[2nd request] Calling studyCourses URLs');
       let studyCoursesWithGroups = [];
+      let amountOfCourses = 0;
+      faculties.forEach(faculty => {
+        faculty.courses.forEach(course => {
+          amountOfCourses++;
+        });
+      });
 
-      studyCourses.map(studyCourse => {
-        request(studyCourse.url, (er, res) => {
-          if (er) {
-            console.log(studyCourse.id + ' studyCourses ERROR:', er);
-          } else {
-            const $ = cheerio.load(res.body);
+      faculties.map(faculty => {
+        faculty.courses.map(studyCourse => {
+          request(studyCourse.url, (er, res) => {
+            if (er) {
+              console.log(studyCourse.id + ' studyCourses ERROR:', er);
+            } else {
+              const $ = cheerio.load(res.body);
 
-            $('tbody tr td a').each((index, el) => {
-              studyCourse.groups.push({
-                id: index,
-                name: el.children[0].data,
-                url: uzUrlPrefix + el.attribs.href
+              $('tbody tr td a').each((index, el) => {
+                studyCourse.groups.push({
+                  id: index,
+                  name: el.children[0].data,
+                  url: uzUrlPrefix + el.attribs.href
+                });
               });
-            });
-          }
+            }
 
-          studyCoursesWithGroups.push(studyCourse);
+            studyCoursesWithGroups.push(faculty);
 
-          if (studyCoursesWithGroups.length == studyCourses.length) {
-            console.log('[2nd request] OK');
-            cb(null, studyCoursesWithGroups);
-          }
+            if (studyCoursesWithGroups.length == amountOfCourses) {
+              console.log('[2nd request] OK');
+              console.log(studyCoursesWithGroups[0]);
+              cb(null, studyCoursesWithGroups);
+            }
+          });
         });
       });
     },
