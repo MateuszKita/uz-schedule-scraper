@@ -127,12 +127,17 @@ const mainScraper = mainUrl => {
       });
 
       let time = 0;
+      let test = [];
       facultiesWithCoursesAndGroups.map(facultysWithCoursesAndGroups => {
         facultysWithCoursesAndGroups.courses.map(course => {
           course.groups.map(group => {
             time += 100;
             setTimeout(() => {
               request(group.url, (er, res) => {
+                const $ = cheerio.load(res.body);
+                $('table tbody tr td em').each((index, el) => {
+                  test.push(el);
+                });
                 group.schedule = {
                   monday: {},
                   tuesday: {},
@@ -142,19 +147,15 @@ const mainScraper = mainUrl => {
                 };
                 processCounter++;
                 if (!er) {
-                  // const $ = cheerio.load(res.body);
-                  // $(".list-group-item li a").each((index, el) => {
-                  //   studyCourses.push({
-                  //     id: index,
-                  //     url: uzUrlPrefix + el.attribs.href,
-                  //     name: el.children[0].data,
-                  //     groups: []
-                  //   });
-                  // });
                   if (processCounter == groupsUrlsAmount) {
                     console.log('[3rd request] OK');
                     cb(null, facultiesWithCoursesAndGroups);
                   } else {
+                    test.forEach(row => {
+                      console.log(row.children[0].children[0].data);
+                    });
+                    //work in here, have to add another children
+
                     console.log(
                       'Processing: ' +
                         (processCounter / groupsUrlsAmount * 100).toFixed(2) +
