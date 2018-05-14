@@ -1,6 +1,8 @@
 const request = require('request');
 const cheerio = require('cheerio');
 const async = require('async');
+const tabletojson = require('tabletojson');
+
 
 const WJF = require('./writeJsonFile');
 
@@ -130,70 +132,75 @@ const mainScraper = mainUrl => {
         facultysWithCoursesAndGroups.courses.map(course => {
           course.groups.map(group => {
             group.schedule = {
-              monday: {},
-              tuesday: {},
-              wednesday: {},
-              thursday: {},
-              friday: {}
+              monday: [],
+              tuesday: [],
+              wednesday: [],
+              thursday: [],
+              friday: [],
+              saturday: [],
+              sunday: [],
+              irregular: [],
+              other: []
             };
             time += 100;
             setTimeout(() => {
               request(group.url, (er, res) => {
                 const $ = cheerio.load(res.body);
-                $('table tbody tr').each((index, el) => {
-                  if (el.attribs.class === 'gray' || el.attribs.class === 'odd' ||
-                    el.attribs.class === 'even' && index !== 0) {
-                    el.children.forEach(child => {
-                      if (child.children && child.children[0].children &&
-                        child.children[0].children[0].children &&
-                        child.children[0].children[0].children[0].data === 'Poniedziałek' &&
-                        child.name === 'td') {
-                        console.log(child.children[0].data);
+
+                let i = tabletojson.convert(res.body)[0]
+
+                if (i && i.length > 0) {
+                  i.map((el, index) => {
+                    if (el.PG === '') {
+                      if (i[index - 1].PG !== '') {
+                        el.PG = i[index - 1].PG
+                      } else if (i[index - 2].PG !== '') {
+                        el.PG = i[index - 2].PG
+                      } else if (i[index - 3].PG !== '') {
+                        el.PG = i[index - 3].PG
+                      } else if (i[index - 4].PG !== '') {
+                        el.PG = i[index - 4].PG
+                      } else if (i[index - 5].PG !== '') {
+                        el.PG = i[index - 5].PG
+                      } else if (i[index - 6].PG !== '') {
+                        el.PG = i[index - 6].PG
+                      } else if (i[index - 7].PG !== '') {
+                        el.PG = i[index - 7].PG
+                      } else {
+                        el.PG = ''
                       }
-                    })
-                  }
-                  // DZIEŃ TYGODNIA
-                  if (el.attribs.class === 'gray' && index !== 0) {
-                    el.children.forEach(child => {
-                      if (child.name === 'td') {
-                        // console.log(
-                        //   child.children[0].children[0].children[0].data
-                        // );
-                      }
-                    });
-                  }
-                  if (
-                    el.attribs.class === 'odd' ||
-                    el.attribs.class === 'even'
-                  ) {
-                    el.children.forEach(child => {
-                      //GODZINY I NAZWA PRZEDMIOTU I RODZAJ ZAJĘĆ
-                      if (
-                        child.name === 'td' &&
-                        child.children[0].type === 'text'
-                      ) {
-                        if (child.children[0].data.trim().length !== 0) {
-                          // console.log(child.children[0].data);
-                        }
-                      }
-                      //DODATKOWE UWAGI
-                      if (
-                        child.children &&
-                        child.children[1] &&
-                        child.children[1].type === 'text'
-                      ) {
-                        // console.log(child.children[1].data);
-                      }
-                      // WYKŁADOWCY I SALE I DNI
-                      // if (
-                      //   child.children &&
-                      //   child.children[0].name === 'a'
-                      // ) {
-                      //   console.log(child.children[0]);
-                      // }
-                    });
-                  }
-                });
+                    }
+                  })
+
+                  i.map((el, index) => {
+                    if (Object.keys(el).length === 1) {
+                      i.splice(index, 1)
+                    }
+                  })
+
+                  i.forEach(el => {
+                    if (el.PG === 'Poniedziałek') {
+                      group.schedule.monday.push(el)
+                    } else if (el.PG === 'Wtorek') {
+                      group.schedule.tuesday.push(el)
+                    } else if (el.PG === 'Środa') {
+                      group.schedule.wednesday.push(el)
+                    } else if (el.PG === 'Czwartek') {
+                      group.schedule.thursday.push(el)
+                    } else if (el.PG === 'Piątek') {
+                      group.schedule.friday.push(el)
+                    } else if (el.PG === 'Piątek') {
+                      group.schedule.saturday.push(el)
+                    } else if (el.PG === 'Sobota') {
+                      group.schedule.sunday.push(el)
+                    } else if (el.PG === 'Nieregularne') {
+                      group.schedule.irregular.push(el)
+                    } else {
+                      group.schedule.other.push(el)
+                    }
+                  })
+                }
+
                 processCounter++;
                 if (!er) {
                   if (processCounter == groupsUrlsAmount) {
