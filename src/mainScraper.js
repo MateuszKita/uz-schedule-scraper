@@ -129,64 +129,77 @@ const mainScraper = mainUrl => {
       facultiesWithCoursesAndGroups.map(facultysWithCoursesAndGroups => {
         facultysWithCoursesAndGroups.courses.map(course => {
           course.groups.map(group => {
+            group.schedule = {
+              monday: {},
+              tuesday: {},
+              wednesday: {},
+              thursday: {},
+              friday: {}
+            };
             time += 100;
             setTimeout(() => {
               request(group.url, (er, res) => {
                 const $ = cheerio.load(res.body);
                 $('table tbody tr').each((index, el) => {
-                  test.push(el);
+                  if (el.attribs.class === 'gray' || el.attribs.class === 'odd' ||
+                    el.attribs.class === 'even' && index !== 0) {
+                    el.children.forEach(child => {
+                      if (child.children && child.children[0].children &&
+                        child.children[0].children[0].children &&
+                        child.children[0].children[0].children[0].data === 'Poniedziałek' &&
+                        child.name === 'td') {
+                        console.log(child.children[0].data);
+                      }
+                    })
+                  }
+                  // DZIEŃ TYGODNIA
+                  if (el.attribs.class === 'gray' && index !== 0) {
+                    el.children.forEach(child => {
+                      if (child.name === 'td') {
+                        // console.log(
+                        //   child.children[0].children[0].children[0].data
+                        // );
+                      }
+                    });
+                  }
+                  if (
+                    el.attribs.class === 'odd' ||
+                    el.attribs.class === 'even'
+                  ) {
+                    el.children.forEach(child => {
+                      //GODZINY I NAZWA PRZEDMIOTU I RODZAJ ZAJĘĆ
+                      if (
+                        child.name === 'td' &&
+                        child.children[0].type === 'text'
+                      ) {
+                        if (child.children[0].data.trim().length !== 0) {
+                          // console.log(child.children[0].data);
+                        }
+                      }
+                      //DODATKOWE UWAGI
+                      if (
+                        child.children &&
+                        child.children[1] &&
+                        child.children[1].type === 'text'
+                      ) {
+                        // console.log(child.children[1].data);
+                      }
+                      // WYKŁADOWCY I SALE I DNI
+                      // if (
+                      //   child.children &&
+                      //   child.children[0].name === 'a'
+                      // ) {
+                      //   console.log(child.children[0]);
+                      // }
+                    });
+                  }
                 });
-                group.schedule = {
-                  monday: {},
-                  tuesday: {},
-                  wednesday: {},
-                  thursday: {},
-                  friday: {}
-                };
                 processCounter++;
                 if (!er) {
                   if (processCounter == groupsUrlsAmount) {
                     console.log('[3rd request] OK');
                     cb(null, facultiesWithCoursesAndGroups);
                   } else {
-                    test.forEach(row => {
-
-                      //DZIEŃ TYGODNIA
-                      // if (row.attribs.class === 'gray') {
-                      //   row.children.forEach(child => {
-                      //     if (child.name === 'td') {
-                      //       console.log(
-                      //         child.children[0].children[0].children[0].data
-                      //       );
-                      //     }
-                      //   });
-                      // }
-                      
-                      if (
-                        row.attribs.class === 'odd' ||
-                        row.attribs.class === 'even'
-                      ) {
-                        row.children.forEach(child => {
-                          //GODZINY I NAZWA PRZEDMIOTU I RODZAJ ZAJĘĆ
-                          // if (child.name === 'td' && child.children[0].type === 'text') {
-                          //   if (child.children[0].data.trim().length !== 0) {
-                          //     console.log(child.children[0].data);
-                          //   }
-                          // }
-
-                          //DODATKOWE UWAGI
-                          if (child.children && child.children[1] && child.children[1].type === 'text') {
-                            console.log(child.children[1].data);
-                          }
-
-                          // WYKŁADOWCY I SALE I DNI
-                          // if (child.children && child.children[0].name === 'a') {
-                          //   console.log(child.children[0]);
-                          // }
-                        })
-                      }
-                    });
-
                     console.log(
                       'Processing: ' +
                       (processCounter / groupsUrlsAmount * 100).toFixed(2) +
