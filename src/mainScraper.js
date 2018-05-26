@@ -87,7 +87,18 @@ const mainScraper = mainUrl => {
                 studyCourse.groups.push({
                   id: index,
                   name: el.children[0].data,
-                  url: uzUrlPrefix + el.attribs.href
+                  url: uzUrlPrefix + el.attribs.href,
+                  schedule: {
+                    monday: [],
+                    tuesday: [],
+                    wednesday: [],
+                    thursday: [],
+                    friday: [],
+                    saturday: [],
+                    sunday: [],
+                    irregular: [],
+                    other: []
+                  }
                 });
               });
             }
@@ -127,75 +138,85 @@ const mainScraper = mainUrl => {
       facultiesWithCoursesAndGroups.map(facultysWithCoursesAndGroups => {
         facultysWithCoursesAndGroups.courses.map(course => {
           course.groups.map(group => {
-            group.schedule = {
-              monday: [],
-              tuesday: [],
-              wednesday: [],
-              thursday: [],
-              friday: [],
-              saturday: [],
-              sunday: [],
-              irregular: [],
-              other: []
-            };
             time += 100;
             setTimeout(() => {
               request(group.url, (er, res) => {
                 const $ = cheerio.load(res.body);
 
-                // let i = tabletojson.convert(res.body)[0];
+                let i = tabletojson.convert(res.body)[0];
 
-                // if (i && i !== undefined && i.length > 0) {
-                //   i.map((el, index) => {
-                //     if (el.PG === '') {
-                //       if (i[index - 1].PG !== '') {
-                //         el.PG = i[index - 1].PG;
-                //       } else if (i[index - 2].PG !== '') {
-                //         el.PG = i[index - 2].PG;
-                //       } else if (i[index - 3].PG !== '') {
-                //         el.PG = i[index - 3].PG;
-                //       } else if (i[index - 4].PG !== '') {
-                //         el.PG = i[index - 4].PG;
-                //       } else if (i[index - 5].PG !== '') {
-                //         el.PG = i[index - 5].PG;
-                //       } else if (i[index - 6].PG !== '') {
-                //         el.PG = i[index - 6].PG;
-                //       } else if (i[index - 7].PG !== '') {
-                //         el.PG = i[index - 7].PG;
-                //       } else {
-                //         el.PG = '';
-                //       }
-                //     }
-                //   });
+                if (i && i !== undefined && i.length > 0) {
+                  i.map((el, index) => {
+                    if (el.PG === '') {
+                      if (i[index - 1].PG !== '') {
+                        el.PG = i[index - 1].PG;
+                      } else if (i[index - 2].PG !== '') {
+                        el.PG = i[index - 2].PG;
+                      } else if (i[index - 3].PG !== '') {
+                        el.PG = i[index - 3].PG;
+                      } else if (i[index - 4].PG !== '') {
+                        el.PG = i[index - 4].PG;
+                      } else if (i[index - 5].PG !== '') {
+                        el.PG = i[index - 5].PG;
+                      } else if (i[index - 6].PG !== '') {
+                        el.PG = i[index - 6].PG;
+                      } else if (i[index - 7].PG !== '') {
+                        el.PG = i[index - 7].PG;
+                      } else {
+                        el.PG = '';
+                      }
+                    }
+                  });
 
-                //   i.map((el, index) => {
-                //     if (Object.keys(el).length === 1) {
-                //       i.splice(index, 1);
-                //     }
-                //   });
+                  i.map((el, index) => {
+                    if (Object.keys(el).length === 1) {
+                      i.splice(index, 1);
+                    }
+                  });
 
-                //   i.forEach(el => {
-                //     if (el.PG === 'Poniedziałek') {
-                //       group.schedule.monday.push(el);
-                //     } else if (el.PG === 'Wtorek') {
-                //       group.schedule.tuesday.push(el);
-                //     } else if (el.PG === 'Środa') {
-                //       group.schedule.wednesday.push(el);
-                //     } else if (el.PG === 'Czwartek') {
-                //       group.schedule.thursday.push(el);
-                //     } else if (el.PG === 'Piątek') {
-                //       group.schedule.friday.push(el);
-                //     } else if (el.PG === 'Sobota') {
-                //       group.schedule.saturday.push(el);
-                //     } else if (el.PG === 'Niedziela') {
-                //       group.schedule.sunday.push(el);
-                //     } else if (el.PG === 'Nieregularne') {
-                //       group.schedule.irregular.push(el);
-                //     } else {
-                //       group.schedule.other.push(el);
-                //     }
-                //   });
-                // }
+                  i.forEach(el => {
+                    delete el['Terminy/Uwagi'];
+                    if (el.PG === 'Poniedziałek') {
+                      group.schedule.monday.push(el);
+                    } else if (el.PG === 'Wtorek') {
+                      group.schedule.tuesday.push(el);
+                    } else if (el.PG === 'Środa') {
+                      group.schedule.wednesday.push(el);
+                    } else if (el.PG === 'Czwartek') {
+                      group.schedule.thursday.push(el);
+                    } else if (el.PG === 'Piątek') {
+                      group.schedule.friday.push(el);
+                    } else if (el.PG === 'Sobota') {
+                      group.schedule.saturday.push(el);
+                    } else if (el.PG === 'Niedziela') {
+                      group.schedule.sunday.push(el);
+                    } else if (el.PG === 'Nieregularne') {
+                      group.schedule.irregular.push(el);
+                    } else {
+                      group.schedule.other.push(el);
+                    }
+                  });
+                }
+
+                if (group.schedule.monday.length == 0) {
+                  group.schedule.monday.push('empty');
+                } else if (group.schedule.tuesday.length == 0) {
+                  group.schedule.tuesday.push('empty');
+                } else if (group.schedule.wednesday.length == 0) {
+                  group.schedule.wednesday.push('empty');
+                } else if (group.schedule.thursday.length == 0) {
+                  group.schedule.thursday.push('empty');
+                } else if (group.schedule.friday.length == 0) {
+                  group.schedule.friday.push('empty');
+                } else if (group.schedule.saturday.length == 0) {
+                  group.schedule.saturday.push('empty');
+                } else if (group.schedule.sunday.length == 0) {
+                  group.schedule.sunday.push('empty');
+                } else if (group.schedule.irregular.length == 0) {
+                  group.schedule.irregular.push('empty');
+                } else if (group.schedule.other.length == 0) {
+                  group.schedule.other.push('empty');
+                }
 
                 processCounter++;
                 if (!er) {
@@ -227,10 +248,6 @@ const mainScraper = mainUrl => {
           return 0;
         }
       );
-
-      // facultiesWithCoursesAndGroups = JSON.stringify(
-      //   facultiesWithCoursesAndGroups
-      // );
 
       axios
         .put(
