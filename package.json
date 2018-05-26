@@ -18,10 +18,12 @@
   "homepage": "https://github.com/MateuszKita/uz-schedule-scraper#readme",
   "dependencies": {
     "async": "^2.6.0",
+    "axios": "^0.18.0",
     "cheerio": "^1.0.0-rc.2",
     "fs-extra": "^5.0.0",
     "npm": "^5.7.1",
     "request": "^2.83.0",
-    "tabletojson": "^0.8.0"
+    "tabletojson": "^0.8.0",
+    "validator": "^10.2.0"
   }
 }
