@@ -1,7 +1,7 @@
 const request = require('request');
+const tabletojson = require('tabletojson');
 const cheerio = require('cheerio');
 const async = require('async');
-const tabletojson = require('tabletojson');
 const axios = require('axios');
 
 const WJF = require('./writeJsonFile');
@@ -147,20 +147,20 @@ const mainScraper = mainUrl => {
 
                 if (i && i !== undefined && i.length > 0) {
                   i.map((el, index) => {
-                    if (el.PG === '') {
-                      if (i[index - 1].PG !== '') {
+                    if (el.PG.length <= 4) {
+                      if (i[index - 1].PG.length > 4) {
                         el.PG = i[index - 1].PG;
-                      } else if (i[index - 2].PG !== '') {
+                      } else if (i[index - 2].PG.length > 4) {
                         el.PG = i[index - 2].PG;
-                      } else if (i[index - 3].PG !== '') {
+                      } else if (i[index - 3].PG.length > 4) {
                         el.PG = i[index - 3].PG;
-                      } else if (i[index - 4].PG !== '') {
+                      } else if (i[index - 4].PG.length > 4) {
                         el.PG = i[index - 4].PG;
-                      } else if (i[index - 5].PG !== '') {
+                      } else if (i[index - 5].PG.length > 4) {
                         el.PG = i[index - 5].PG;
-                      } else if (i[index - 6].PG !== '') {
+                      } else if (i[index - 6].PG.length > 4) {
                         el.PG = i[index - 6].PG;
-                      } else if (i[index - 7].PG !== '') {
+                      } else if (i[index - 7].PG.length > 4) {
                         el.PG = i[index - 7].PG;
                       } else {
                         el.PG = '';
@@ -175,6 +175,11 @@ const mainScraper = mainUrl => {
                   });
 
                   i.forEach(el => {
+                    Object.defineProperty(
+                      el,
+                      'TerminyUwagi',
+                      Object.getOwnPropertyDescriptor(el, 'Terminy/Uwagi')
+                    );
                     delete el['Terminy/Uwagi'];
                     if (el.PG === 'Poniedziałek') {
                       group.schedule.monday.push(el);
@@ -198,27 +203,8 @@ const mainScraper = mainUrl => {
                   });
                 }
 
-                if (group.schedule.monday.length == 0) {
-                  group.schedule.monday.push('empty');
-                } else if (group.schedule.tuesday.length == 0) {
-                  group.schedule.tuesday.push('empty');
-                } else if (group.schedule.wednesday.length == 0) {
-                  group.schedule.wednesday.push('empty');
-                } else if (group.schedule.thursday.length == 0) {
-                  group.schedule.thursday.push('empty');
-                } else if (group.schedule.friday.length == 0) {
-                  group.schedule.friday.push('empty');
-                } else if (group.schedule.saturday.length == 0) {
-                  group.schedule.saturday.push('empty');
-                } else if (group.schedule.sunday.length == 0) {
-                  group.schedule.sunday.push('empty');
-                } else if (group.schedule.irregular.length == 0) {
-                  group.schedule.irregular.push('empty');
-                } else if (group.schedule.other.length == 0) {
-                  group.schedule.other.push('empty');
-                }
-
                 processCounter++;
+
                 if (!er) {
                   if (processCounter == groupsUrlsAmount) {
                     console.log('[3rd request] OK');
@@ -242,12 +228,20 @@ const mainScraper = mainUrl => {
     (facultiesWithCoursesAndGroups, cb) => {
       console.log('[POST API to Firebase in progress]');
       facultiesWithCoursesAndGroups = facultiesWithCoursesAndGroups.sort(
-        (course, another) => {
-          if (course.id < another.id) return -1;
-          if (course.id > another.id) return 1;
-          return 0;
+        (faculty, another) => {
+          return faculty.id - another.id;
         }
       );
+
+      facultiesWithCoursesAndGroups.map(faculty => {
+        faculty.courses.map(course => {
+          course.groups.sort((group, another) => {
+            return group.id - another.id;
+          });
+        });
+      });
+
+      console.log(facultiesWithCoursesAndGroups);
 
       axios
         .put(
@@ -258,7 +252,10 @@ const mainScraper = mainUrl => {
           axios
             .put(
               `https://planuz-3454a.firebaseio.com/last-scraped.json`,
-              JSON.stringify({ miliseconds: new Date().getTime() })
+              JSON.stringify({
+                miliseconds: new Date().getTime(),
+                normalFormat: new Date()
+              })
             )
             .then(() => {
               console.log('POST Success');
