@@ -141,83 +141,84 @@ const mainScraper = mainUrl => {
             time += 100;
             setTimeout(() => {
               request(group.url, (er, res) => {
-                const $ = cheerio.load(res.body);
+                if (res.body) {
+                  const $ = cheerio.load(res.body);
 
-                let i = tabletojson.convert(res.body)[0];
+                  let i = tabletojson.convert(res.body)[0];
 
-                if (i && i !== undefined && i.length > 0) {
-                  i.map((el, index) => {
-                    if (el.PG.length <= 4) {
-                      if (i[index - 1].PG.length > 4) {
-                        el.PG = i[index - 1].PG;
-                      } else if (i[index - 2].PG.length > 4) {
-                        el.PG = i[index - 2].PG;
-                      } else if (i[index - 3].PG.length > 4) {
-                        el.PG = i[index - 3].PG;
-                      } else if (i[index - 4].PG.length > 4) {
-                        el.PG = i[index - 4].PG;
-                      } else if (i[index - 5].PG.length > 4) {
-                        el.PG = i[index - 5].PG;
-                      } else if (i[index - 6].PG.length > 4) {
-                        el.PG = i[index - 6].PG;
-                      } else if (i[index - 7].PG.length > 4) {
-                        el.PG = i[index - 7].PG;
-                      } else {
-                        el.PG = '';
+                  if (i && i !== undefined && i.length > 0) {
+                    i.map((el, index) => {
+                      if (el.PG.length <= 4) {
+                        if (i[index - 1].PG.length > 4) {
+                          el.PG = i[index - 1].PG;
+                        } else if (i[index - 2].PG.length > 4) {
+                          el.PG = i[index - 2].PG;
+                        } else if (i[index - 3].PG.length > 4) {
+                          el.PG = i[index - 3].PG;
+                        } else if (i[index - 4].PG.length > 4) {
+                          el.PG = i[index - 4].PG;
+                        } else if (i[index - 5].PG.length > 4) {
+                          el.PG = i[index - 5].PG;
+                        } else if (i[index - 6].PG.length > 4) {
+                          el.PG = i[index - 6].PG;
+                        } else if (i[index - 7].PG.length > 4) {
+                          el.PG = i[index - 7].PG;
+                        } else {
+                          el.PG = '';
+                        }
                       }
-                    }
-                  });
+                    });
 
-                  i.map((el, index) => {
-                    if (Object.keys(el).length === 1) {
-                      i.splice(index, 1);
-                    }
-                  });
+                    i.map((el, index) => {
+                      if (Object.keys(el).length === 1) {
+                        i.splice(index, 1);
+                      }
+                    });
 
-                  i.forEach(el => {
-                    Object.defineProperty(
-                      el,
-                      'TerminyUwagi',
-                      Object.getOwnPropertyDescriptor(el, 'Terminy/Uwagi')
-                    );
-                    delete el['Terminy/Uwagi'];
-                    if (el.PG === 'Poniedziałek') {
-                      group.schedule.monday.push(el);
-                    } else if (el.PG === 'Wtorek') {
-                      group.schedule.tuesday.push(el);
-                    } else if (el.PG === 'Środa') {
-                      group.schedule.wednesday.push(el);
-                    } else if (el.PG === 'Czwartek') {
-                      group.schedule.thursday.push(el);
-                    } else if (el.PG === 'Piątek') {
-                      group.schedule.friday.push(el);
-                    } else if (el.PG === 'Sobota') {
-                      group.schedule.saturday.push(el);
-                    } else if (el.PG === 'Niedziela') {
-                      group.schedule.sunday.push(el);
-                    } else if (el.PG === 'Nieregularne') {
-                      group.schedule.irregular.push(el);
-                    } else {
-                      group.schedule.other.push(el);
-                    }
-                  });
-                }
-
-                processCounter++;
-
-                if (!er) {
-                  if (processCounter == groupsUrlsAmount) {
-                    console.log('[3rd request] OK');
-                    cb(null, facultiesWithCoursesAndGroups);
-                  } else {
-                    console.log(
-                      'Processing: ' +
-                        (processCounter / groupsUrlsAmount * 100).toFixed(2) +
-                        '%'
-                    );
+                    i.forEach(el => {
+                      Object.defineProperty(
+                        el,
+                        'TerminyUwagi',
+                        Object.getOwnPropertyDescriptor(el, 'Terminy/Uwagi')
+                      );
+                      delete el['Terminy/Uwagi'];
+                      if (el.PG === 'Poniedziałek') {
+                        group.schedule.monday.push(el);
+                      } else if (el.PG === 'Wtorek') {
+                        group.schedule.tuesday.push(el);
+                      } else if (el.PG === 'Środa') {
+                        group.schedule.wednesday.push(el);
+                      } else if (el.PG === 'Czwartek') {
+                        group.schedule.thursday.push(el);
+                      } else if (el.PG === 'Piątek') {
+                        group.schedule.friday.push(el);
+                      } else if (el.PG === 'Sobota') {
+                        group.schedule.saturday.push(el);
+                      } else if (el.PG === 'Niedziela') {
+                        group.schedule.sunday.push(el);
+                      } else if (el.PG === 'Nieregularne') {
+                        group.schedule.irregular.push(el);
+                      } else {
+                        group.schedule.other.push(el);
+                      }
+                    });
                   }
-                } else {
-                  console.log('[3rd request] ERROR: ' + er);
+                  processCounter++;
+
+                  if (!er) {
+                    if (processCounter == groupsUrlsAmount) {
+                      console.log('[3rd request] OK');
+                      cb(null, facultiesWithCoursesAndGroups);
+                    } else {
+                      console.log(
+                        'Processing: ' +
+                          (processCounter / groupsUrlsAmount * 100).toFixed(2) +
+                          '%'
+                      );
+                    }
+                  } else {
+                    console.log('[3rd request] ERROR: ' + er);
+                  }
                 }
               });
             }, 2500 + time);
@@ -234,32 +235,45 @@ const mainScraper = mainUrl => {
       );
 
       facultiesWithCoursesAndGroups.map(faculty => {
-        faculty.courses.map(course => {
+        faculty.courses.map((course, index) => {
+          course.id = index;
           course.groups.sort((group, another) => {
             return group.id - another.id;
           });
         });
       });
 
-      console.log(facultiesWithCoursesAndGroups);
-
       axios
-        .put(
-          `https://planuz-3454a.firebaseio.com/script-scraped.json`,
-          facultiesWithCoursesAndGroups
-        )
+        .delete(`https://planuz-3454a.firebaseio.com/script-scraped.json`)
         .then(() => {
           axios
-            .put(
-              `https://planuz-3454a.firebaseio.com/last-scraped.json`,
-              JSON.stringify({
-                miliseconds: new Date().getTime(),
-                normalFormat: new Date()
-              })
-            )
+            .delete(`https://planuz-3454a.firebaseio.com/last-scraped.json`)
             .then(() => {
-              console.log('POST Success');
-              cb(null, facultiesWithCoursesAndGroups);
+              axios
+                .post(
+                  `https://planuz-3454a.firebaseio.com/script-scraped.json`,
+                  facultiesWithCoursesAndGroups
+                )
+                .then(() => {
+                  axios
+                    .post(
+                      `https://planuz-3454a.firebaseio.com/last-scraped.json`,
+                      JSON.stringify({
+                        miliseconds: new Date().getTime(),
+                        normalFormat: new Date()
+                      })
+                    )
+                    .then(() => {
+                      console.log('POST Success');
+                      cb(null, facultiesWithCoursesAndGroups);
+                    })
+                    .catch(error => {
+                      console.log(error);
+                    });
+                })
+                .catch(error => {
+                  console.log(error);
+                });
             })
             .catch(error => {
               console.log(error);
