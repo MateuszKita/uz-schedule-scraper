@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const writeToFile = object => {
   let newObject = {
     key: new Date().getTime(),
+    date: new Date(),
     data: object
   };
   let fileName = newObject.key.toString();
