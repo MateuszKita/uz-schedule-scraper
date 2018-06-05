@@ -145,25 +145,33 @@ const mainScraper = mainUrl => {
                   const $ = cheerio.load(res.body);
 
                   let i = tabletojson.convert(res.body)[0];
-
+                  
                   if (i && i !== undefined && i.length > 0) {
                     i.map((el, index) => {
                       if (el.PG.length <= 4) {
                         if (i[index - 1].PG.length > 4) {
+                          if (el.PG.length > 0) el.subgroup = el.PG;
                           el.PG = i[index - 1].PG;
                         } else if (i[index - 2].PG.length > 4) {
+                          if (el.PG.length > 0) el.subgroup = el.PG;
                           el.PG = i[index - 2].PG;
                         } else if (i[index - 3].PG.length > 4) {
+                          if (el.PG.length > 0) el.subgroup = el.PG;
                           el.PG = i[index - 3].PG;
                         } else if (i[index - 4].PG.length > 4) {
+                          if (el.PG.length > 0) el.subgroup = el.PG;
                           el.PG = i[index - 4].PG;
                         } else if (i[index - 5].PG.length > 4) {
+                          if (el.PG.length > 0) el.subgroup = el.PG;
                           el.PG = i[index - 5].PG;
                         } else if (i[index - 6].PG.length > 4) {
+                          if (el.PG.length > 0) el.subgroup = el.PG;
                           el.PG = i[index - 6].PG;
                         } else if (i[index - 7].PG.length > 4) {
+                          if (el.PG.length > 0) el.subgroup = el.PG;
                           el.PG = i[index - 7].PG;
                         } else {
+                          if (el.PG.length > 0) el.subgroup = el.PG;
                           el.PG = '';
                         }
                       }
