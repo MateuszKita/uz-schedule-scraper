@@ -244,36 +244,22 @@ const mainScraper = mainUrl => {
       });
 
       axios
-        .delete(`https://planuz-3454a.firebaseio.com/script-scraped.json`)
+        .put(
+          `https://planuz-3454a.firebaseio.com/script-scraped.json`,
+          facultiesWithCoursesAndGroups
+        )
         .then(() => {
           axios
-            .delete(`https://planuz-3454a.firebaseio.com/last-scraped.json`)
+            .put(
+              `https://planuz-3454a.firebaseio.com/last-scraped.json`,
+              JSON.stringify({
+                miliseconds: new Date().getTime(),
+                normalFormat: new Date()
+              })
+            )
             .then(() => {
-              axios
-                .post(
-                  `https://planuz-3454a.firebaseio.com/script-scraped.json`,
-                  facultiesWithCoursesAndGroups
-                )
-                .then(() => {
-                  axios
-                    .post(
-                      `https://planuz-3454a.firebaseio.com/last-scraped.json`,
-                      JSON.stringify({
-                        miliseconds: new Date().getTime(),
-                        normalFormat: new Date()
-                      })
-                    )
-                    .then(() => {
-                      console.log('POST Success');
-                      cb(null, facultiesWithCoursesAndGroups);
-                    })
-                    .catch(error => {
-                      console.log(error);
-                    });
-                })
-                .catch(error => {
-                  console.log(error);
-                });
+              console.log('POST Success');
+              cb(null, facultiesWithCoursesAndGroups);
             })
             .catch(error => {
               console.log(error);
